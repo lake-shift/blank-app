@@ -3,7 +3,7 @@ import requests
 import json
 from streamlit_autorefresh import st_autorefresh
 
-hi
+
 host = st.secrets["HOST"]
 token = st.secrets["TOKEN"]
 job_id = st.secrets["JOB_ID"]

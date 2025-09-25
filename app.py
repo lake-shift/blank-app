@@ -22,34 +22,24 @@ if "job_outputs" not in st.session_state:
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
 
-# --- Floating Icon Button (Bottom-Right) ---
+# --- CSS for floating button (bottom-right) ---
 st.markdown("""
     <style>
-        .icon-button {
+        .floating-btn-container {
             position: fixed;
             bottom: 25px;
             right: 25px;
             z-index: 9999;
         }
-        .icon-button button {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: none;
-            background: #4facfe;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
     </style>
-    <div class="icon-button">
-        <button onclick="document.dispatchEvent(new Event('st_demo_button'))">💬</button>
-    </div>
 """, unsafe_allow_html=True)
 
-# --- Detect button click ---
-if st.query_params.get("st_demo_button") is not None:
-    st.session_state.show_form = not st.session_state.show_form  # toggle form visibility
+# --- Floating Demo Button (Streamlit button) ---
+with st.container():
+    st.markdown('<div class="floating-btn-container">', unsafe_allow_html=True)
+    if st.button("💬 Demo", key="demo_button"):
+        st.session_state.show_form = not st.session_state.show_form  # toggle form
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Book Demo Form ---
 if st.session_state.show_form:

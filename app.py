@@ -30,7 +30,7 @@ st.markdown("""
         .sticky-button {
             position: fixed;
             top: 60px;
-            left: 20px;
+            left: 10px;
             z-index: 9999;
         }
         .custom-button {

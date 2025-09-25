@@ -31,6 +31,8 @@ st.markdown("""
             left: 50%;
             transform: translateX(-50%);
             z-index: 9999;
+            width: max-content;
+            text-align: center;
         }
         .custom-button {
             background: linear-gradient(90deg, #4facfe, #00f2fe);
@@ -45,12 +47,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Sticky Bottom-Center Demo Button ---
-with st.container():
-    st.markdown('<div class="sticky-button">', unsafe_allow_html=True)
-    if st.button("Book demo for free", key="demo_button"):
-        st.session_state.show_form = not st.session_state.show_form  # toggle form
-    st.markdown('</div>', unsafe_allow_html=True)
-
+if st.button("Book demo for free", key="demo_button"):
+    st.session_state.show_form = not st.session_state.show_form  # toggle form
 # --- Book Demo Form ---
 if st.session_state.show_form:
     st.subheader("Book Your Demo")

@@ -11,8 +11,8 @@ host = st.secrets["HOST"]
 token = st.secrets["TOKEN"]
 job_id = st.secrets["JOB_ID"]
 sender_email = st.secrets["SE"]
-sender_password = st.secrets["SP"]
 receiver_email = st.secrets["RE"]
+api_key = st.secrets["AK"]
 
 # --- Session state ---
 if "run_id" not in st.session_state:
@@ -148,7 +148,7 @@ if st.session_state.job_outputs:
 
 
 
-API_KEY = "your_brevo_api_key"   # paste Brevo API key here
+API_KEY = api_key
 TO_EMAIL = sender_email
 FROM_EMAIL = receiver_email
 

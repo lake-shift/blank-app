@@ -29,7 +29,7 @@ st.markdown("""
     <style>
         .sticky-button {
             position: fixed;
-            top: 50px;
+            top: 60px;
             left: 20px;
             z-index: 9999;
         }

@@ -22,32 +22,34 @@ if "job_outputs" not in st.session_state:
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
 
-# --- CSS for corner floating button ---
+# --- Floating Icon Button (Bottom-Right) ---
 st.markdown("""
     <style>
-        .corner-button {
+        .icon-button {
             position: fixed;
-            bottom: 30px;   /* distance from bottom */
-            right: 30px;    /* distance from right */
+            bottom: 25px;
+            right: 25px;
             z-index: 9999;
         }
-        .corner-button button {
-            background: linear-gradient(90deg, #4facfe, #00f2fe);
-            color: white;
+        .icon-button button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            border-radius: 6px;
+            background: #4facfe;
+            color: white;
+            font-size: 24px;
             cursor: pointer;
         }
     </style>
+    <div class="icon-button">
+        <button onclick="document.dispatchEvent(new Event('st_demo_button'))">💬</button>
+    </div>
 """, unsafe_allow_html=True)
 
-# --- Corner Floating Button ---
-st.markdown('<div class="corner-button">', unsafe_allow_html=True)
-if st.button("Book demo for free", key="demo_button"):
-    st.session_state.show_form = not st.session_state.show_form  # toggle form
-st.markdown('</div>', unsafe_allow_html=True)
+# --- Detect button click ---
+if st.query_params.get("st_demo_button") is not None:
+    st.session_state.show_form = not st.session_state.show_form  # toggle form visibility
 
 # --- Book Demo Form ---
 if st.session_state.show_form:

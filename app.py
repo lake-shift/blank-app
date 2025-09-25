@@ -3,8 +3,8 @@ import requests
 import json
 from streamlit_autorefresh import st_autorefresh
 import smtplib
-import requests
 
+# --- Secrets ---
 host = st.secrets["HOST"]
 token = st.secrets["TOKEN"]
 job_id = st.secrets["JOB_ID"]
@@ -20,39 +20,11 @@ if "uploaded_file_name" not in st.session_state:
 if "job_done" not in st.session_state:
     st.session_state.job_done = False
 if "job_outputs" not in st.session_state:
-    st.session_state.job_outputs = {}   # task_key -> (output, filename)
+    st.session_state.job_outputs = {}  # task_key -> (output, filename)
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
-#
-if "clicked" not in st.session_state:
-    st.session_state.clicked = False
 
-# Custom styled button
-st.markdown("""
-<style>
-.my-button {
-    background-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Actual clickable button
-if st.button("Click Me"):
-    st.session_state.clicked = True
-
-# Action based on click
-if st.session_state.clicked:
-    st.write("Button clicked!")
-#
-
-
-# --- Sticky Top-Left Demo Button ---
+# --- CSS for sticky button ---
 st.markdown("""
     <style>
         .sticky-button {
@@ -61,27 +33,25 @@ st.markdown("""
             left: 20px;
             z-index: 9999;
         }
+        .custom-button {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
     </style>
-    <div class="sticky-button">
-        <button onclick="document.dispatchEvent(new Event('st_demo_button'))" 
-                style="
-                    background-color:#4facfe; 
-                    color:white; 
-                    border:none; 
-                    padding:12px 20px; 
-                    font-size:16px; 
-                    border-radius:6px; 
-                    cursor:pointer;
-                ">
-            Book demo for free
-        </button>
-    </div>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# Detect button click
-if st.query_params.get("st_demo_button") is not None:
-    st.session_state.show_form = True
-    
+# --- Sticky Top-Left Demo Button ---
+with st.container():
+    col1, col2 = st.columns([1, 5])
+    with col1:
+        if st.button("Book demo for free", key="demo_button"):
+            st.session_state.show_form = True
+
 # --- Book Demo Form ---
 if st.session_state.show_form:
     st.subheader("Book Your Demo")
@@ -94,29 +64,25 @@ if st.session_state.show_form:
 
         submitted = st.form_submit_button("Submit")
         if submitted:
-            # Brevo email
-            API_KEY = api_key
-            TO_EMAIL = receiver_email
-            FROM_EMAIL = sender_email
-
+            # Send email via Brevo API
             def send_email(name, mobile, email, company, message):
                 url = "https://api.brevo.com/v3/smtp/email"
                 headers = {
                     "accept": "application/json",
-                    "api-key": API_KEY,
+                    "api-key": api_key,
                     "content-type": "application/json"
                 }
                 payload = {
-                    "sender": {"name": "Lakeshift", "email": FROM_EMAIL},
-                    "to": [{"email": TO_EMAIL}],
+                    "sender": {"name": "Lakeshift", "email": sender_email},
+                    "to": [{"email": receiver_email}],
                     "subject": "New Demo Request",
                     "htmlContent": f"""
-                    <h3>New Demo Request</h3>
-                    <p><b>Name:</b> {name}</p>
-                    <p><b>Mobile:</b> {mobile}</p>
-                    <p><b>Email:</b> {email}</p>
-                    <p><b>Company:</b> {company}</p>
-                    <p><b>Message:</b> {message}</p>
+                        <h3>New Demo Request</h3>
+                        <p><b>Name:</b> {name}</p>
+                        <p><b>Mobile:</b> {mobile}</p>
+                        <p><b>Email:</b> {email}</p>
+                        <p><b>Company:</b> {company}</p>
+                        <p><b>Message:</b> {message}</p>
                     """
                 }
                 response = requests.post(url, headers=headers, json=payload)
@@ -130,8 +96,7 @@ if st.session_state.show_form:
                 st.error("❌ Failed to send email. Please try again later.")
 
 # --- UI Header ---
-st.markdown(
-    """
+st.markdown("""
     <h1 style="
         text-align: center;
         font-size: 56px;
@@ -144,15 +109,14 @@ st.markdown(
     ">
         LakeShift
     </h1>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
 st.markdown(
     "<h4 style='text-align:center; color:gray;'>Migrate SAP HANA Calculation Views to Databricks in Seconds 🚀</h4>",
     unsafe_allow_html=True
 )
 
+# --- File Uploader ---
 uploaded_file = st.file_uploader("Choose a file", type=["txt", "xml"])
 
 # --- Start Button ---
@@ -160,24 +124,18 @@ if uploaded_file is not None and st.button("🚀 Start"):
     file_bytes = uploaded_file.read()
     volume_path = f"/Volumes/project1/project1/project1/{uploaded_file.name}"
 
+    # Upload file to Databricks
     url = f"{host}/api/2.0/fs/files{volume_path}"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/octet-stream"
-    }
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/octet-stream"}
     response = requests.put(url, headers=headers, data=file_bytes)
 
     if response.status_code in [200, 201, 204]:
         st.success("✅ File uploaded")
 
-        # Trigger the Databricks Job
+        # Trigger Databricks Job
         run_url = f"{host}/api/2.1/jobs/run-now"
         payload = {"job_id": job_id, "notebook_params": {"xml_input": volume_path}}
-        run_response = requests.post(
-            run_url,
-            headers={"Authorization": f"Bearer {token}"},
-            json=payload
-        )
+        run_response = requests.post(run_url, headers={"Authorization": f"Bearer {token}"}, json=payload)
 
         if run_response.status_code == 200:
             run_id = run_response.json().get("run_id")
@@ -246,4 +204,4 @@ if st.session_state.job_outputs:
             file_name=filename,
             mime="text/plain",
             key=f"dl_{task_key}"
-                                            )
+                )

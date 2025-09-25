@@ -5,8 +5,6 @@ from streamlit_autorefresh import st_autorefresh
 import smtplib
 import requests
 
-
-
 host = st.secrets["HOST"]
 token = st.secrets["TOKEN"]
 job_id = st.secrets["JOB_ID"]
@@ -23,7 +21,85 @@ if "job_done" not in st.session_state:
     st.session_state.job_done = False
 if "job_outputs" not in st.session_state:
     st.session_state.job_outputs = {}   # task_key -> (output, filename)
+if "show_form" not in st.session_state:
+    st.session_state.show_form = False
 
+# --- Sticky Top-Left Demo Button ---
+st.markdown("""
+    <style>
+        .sticky-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9999;
+        }
+    </style>
+    <div class="sticky-button">
+        <button onclick="document.dispatchEvent(new Event('st_demo_button'))" 
+                style="
+                    background-color:#4facfe; 
+                    color:white; 
+                    border:none; 
+                    padding:12px 20px; 
+                    font-size:16px; 
+                    border-radius:6px; 
+                    cursor:pointer;
+                ">
+            📅 Book demo for free
+        </button>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Detect button click
+if st.experimental_get_query_params().get("st_demo_button") is not None:
+    st.session_state.show_form = True
+
+# --- Book Demo Form ---
+if st.session_state.show_form:
+    st.subheader("Book Your Demo")
+    with st.form("demo_form"):
+        name = st.text_input("Name (optional)")
+        mobile = st.text_input("Mobile No (optional)")
+        email = st.text_input("Email ID (optional)")
+        company = st.text_input("Company Name (optional)")
+        message = st.text_area("Message (optional)")
+
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            # Brevo email
+            API_KEY = api_key
+            TO_EMAIL = receiver_email
+            FROM_EMAIL = sender_email
+
+            def send_email(name, mobile, email, company, message):
+                url = "https://api.brevo.com/v3/smtp/email"
+                headers = {
+                    "accept": "application/json",
+                    "api-key": API_KEY,
+                    "content-type": "application/json"
+                }
+                payload = {
+                    "sender": {"name": "Lakeshift", "email": FROM_EMAIL},
+                    "to": [{"email": TO_EMAIL}],
+                    "subject": "New Demo Request",
+                    "htmlContent": f"""
+                    <h3>New Demo Request</h3>
+                    <p><b>Name:</b> {name}</p>
+                    <p><b>Mobile:</b> {mobile}</p>
+                    <p><b>Email:</b> {email}</p>
+                    <p><b>Company:</b> {company}</p>
+                    <p><b>Message:</b> {message}</p>
+                    """
+                }
+                response = requests.post(url, headers=headers, json=payload)
+                return response.status_code == 201
+
+            success = send_email(name, mobile, email, company, message)
+            if success:
+                st.success("✅ Your demo request has been sent!")
+                st.session_state.show_form = False
+            else:
+                st.error("❌ Failed to send email. Please try again later.")
 
 # --- UI Header ---
 st.markdown(
@@ -87,7 +163,6 @@ if uploaded_file is not None and st.button("🚀 Start"):
     else:
         st.error(f"❌ Upload failed: {response.status_code} - {response.text}")
 
-
 # --- Polling with auto-refresh ---
 if st.session_state.run_id and not st.session_state.job_done:
     st_autorefresh(interval=10000, key="databricks_status")
@@ -133,7 +208,6 @@ if st.session_state.run_id and not st.session_state.job_done:
     else:
         st.info(f"⏳ Job : {life_cycle}")
 
-
 # --- Persist Download Buttons ---
 if st.session_state.job_outputs:
     st.subheader("📥 Download Results")
@@ -144,60 +218,4 @@ if st.session_state.job_outputs:
             file_name=filename,
             mime="text/plain",
             key=f"dl_{task_key}"
-        )
-
-
-
-API_KEY = api_key
-TO_EMAIL = receiver_email
-FROM_EMAIL = sender_email
-
-def send_email(name, mobile, email, company, message):
-    url = "https://api.brevo.com/v3/smtp/email"
-    headers = {
-        "accept": "application/json",
-        "api-key": API_KEY,
-        "content-type": "application/json"
-    }
-    payload = {
-        "sender": {"name": "Lakeshift", "email": FROM_EMAIL},
-        "to": [{"email": TO_EMAIL}],
-        "subject": "New Demo Request",
-        "htmlContent": f"""
-        <h3>New Demo Request</h3>
-        <p><b>Name:</b> {name}</p>
-        <p><b>Mobile:</b> {mobile}</p>
-        <p><b>Email:</b> {email}</p>
-        <p><b>Company:</b> {company}</p>
-        <p><b>Message:</b> {message}</p>
-        """
-    }
-
-    response = requests.post(url, headers=headers, json=payload)
-    return response.status_code == 201
-
-# --- UI ---
-st.set_page_config(layout="wide")
-
-# Use columns to place button on top-left
-col1, col2, col3 = st.columns([1, 8, 1])  # col1 is small, col2 fills center
-if col1.button("📅 Book demo for free"):
-    st.session_state.show_form = True
-
-if st.session_state.show_form:
-    st.subheader("Book Your Demo")
-    with st.form("demo_form"):
-        name = st.text_input("Name (optional)")
-        mobile = st.text_input("Mobile No (optional)")
-        email = st.text_input("Email ID (optional)")
-        company = st.text_input("Company Name (optional)")
-        message = st.text_area("Message (optional)")
-
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            success = send_email(name, mobile, email, company, message)
-            if success:
-                st.success("✅ Your demo request has been sent!")
-                st.session_state.show_form = False
-            else:
-                st.error("❌ Failed to send email. Please try again later.")
+                                            )

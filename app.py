@@ -149,8 +149,8 @@ if st.session_state.job_outputs:
 
 
 API_KEY = api_key
-TO_EMAIL = sender_email
-FROM_EMAIL = receiver_email
+TO_EMAIL = receiver_email
+FROM_EMAIL = sender_email
 
 def send_email(name, mobile, email, company, message):
     url = "https://api.brevo.com/v3/smtp/email"

@@ -10,7 +10,7 @@ token = st.secrets["TOKEN"]
 job_id = st.secrets["JOB_ID"]
 sender_email = st.secrets["SE"]
 sender_password = st.secrets["SP"]
-receiver_email st.secrets["RE"]
+receiver_email = st.secrets["RE"]
 
 # --- Session state ---
 if "run_id" not in st.session_state:

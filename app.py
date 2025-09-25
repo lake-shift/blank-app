@@ -24,77 +24,6 @@ if "job_outputs" not in st.session_state:
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
 
-# --- CSS for sticky button ---
-st.markdown("""
-    <style>
-        .sticky-button {
-            position: fixed;
-            top: 60px;
-            left: 10px;
-            z-index: 9999;
-        }
-        .custom-button {
-            background: linear-gradient(90deg, #4facfe, #00f2fe);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# --- Sticky Top-Left Demo Button ---
-with st.container():
-    col1, col2 = st.columns([1, 5])
-    with col1:
-        if st.button("Book demo for free", key="demo_button"):
-            st.session_state.show_form = True
-
-# --- Book Demo Form ---
-if st.session_state.show_form:
-    st.subheader("Book Your Demo")
-    with st.form("demo_form"):
-        name = st.text_input("Name (optional)")
-        mobile = st.text_input("Mobile No (optional)")
-        email = st.text_input("Email ID")
-        company = st.text_input("Company Name (optional)")
-        message = st.text_area("Message (optional)")
-
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            # Send email via Brevo API
-            def send_email(name, mobile, email, company, message):
-                url = "https://api.brevo.com/v3/smtp/email"
-                headers = {
-                    "accept": "application/json",
-                    "api-key": api_key,
-                    "content-type": "application/json"
-                }
-                payload = {
-                    "sender": {"name": "Lakeshift", "email": sender_email},
-                    "to": [{"email": receiver_email}],
-                    "subject": "New Demo Request",
-                    "htmlContent": f"""
-                        <h3>New Demo Request</h3>
-                        <p><b>Name:</b> {name}</p>
-                        <p><b>Mobile:</b> {mobile}</p>
-                        <p><b>Email:</b> {email}</p>
-                        <p><b>Company:</b> {company}</p>
-                        <p><b>Message:</b> {message}</p>
-                    """
-                }
-                response = requests.post(url, headers=headers, json=payload)
-                return response.status_code == 201
-
-            success = send_email(name, mobile, email, company, message)
-            if success:
-                st.success("✅ Your demo request has been sent!")
-                st.session_state.show_form = False
-            else:
-                st.error("❌ Failed to send email. Please try again later.")
-
 # --- UI Header ---
 st.markdown("""
     <h1 style="
@@ -205,4 +134,74 @@ if st.session_state.job_outputs:
             mime="text/plain",
             key=f"dl_{task_key}"
         )
-        
+
+# --- CSS for sticky button ---
+st.markdown("""
+    <style>
+        .sticky-button {
+            position: fixed;
+            top: 60px;
+            left: 10px;
+            z-index: 9999;
+        }
+        .custom-button {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- Sticky Top-Left Demo Button ---
+with st.container():
+    col1, col2 = st.columns([1, 5])
+    with col1:
+        if st.button("Book demo for free", key="demo_button"):
+            st.session_state.show_form = True
+
+# --- Book Demo Form ---
+if st.session_state.show_form:
+    st.subheader("Book Your Demo")
+    with st.form("demo_form"):
+        name = st.text_input("Name (optional)")
+        mobile = st.text_input("Mobile No (optional)")
+        email = st.text_input("Email ID")
+        company = st.text_input("Company Name (optional)")
+        message = st.text_area("Message (optional)")
+
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            # Send email via Brevo API
+            def send_email(name, mobile, email, company, message):
+                url = "https://api.brevo.com/v3/smtp/email"
+                headers = {
+                    "accept": "application/json",
+                    "api-key": api_key,
+                    "content-type": "application/json"
+                }
+                payload = {
+                    "sender": {"name": "Lakeshift", "email": sender_email},
+                    "to": [{"email": receiver_email}],
+                    "subject": "New Demo Request",
+                    "htmlContent": f"""
+                        <h3>New Demo Request</h3>
+                        <p><b>Name:</b> {name}</p>
+                        <p><b>Mobile:</b> {mobile}</p>
+                        <p><b>Email:</b> {email}</p>
+                        <p><b>Company:</b> {company}</p>
+                        <p><b>Message:</b> {message}</p>
+                    """
+                }
+                response = requests.post(url, headers=headers, json=payload)
+                return response.status_code == 201
+
+            success = send_email(name, mobile, email, company, message)
+            if success:
+                st.success("✅ Your demo request has been sent!")
+                st.session_state.show_form = False
+            else:
+                st.error("❌ Failed to send email. Please try again later.")

@@ -29,7 +29,7 @@ st.markdown("""
     <style>
         .sticky-button {
             position: fixed;
-            top: 20px;
+            top: 10px;
             left: 20px;
             z-index: 9999;
         }
@@ -45,7 +45,7 @@ st.markdown("""
                     border-radius:6px; 
                     cursor:pointer;
                 ">
-            📅 Book demo for free
+            Book demo for free
         </button>
     </div>
     """, unsafe_allow_html=True)

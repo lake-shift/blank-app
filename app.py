@@ -41,7 +41,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown(
-    "<h4 style='text-align:center; color:gray;'>Migrate SAP HANA Calculation Views to Databricks in Seconds 🚀</h4>",
+    "<h4 style='text-align:center; color:gray;'>Migrate SAP HANA Calculation Views to Databricks in one click 🚀</h4>",
     unsafe_allow_html=True
 )
 

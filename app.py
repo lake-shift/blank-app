@@ -23,6 +23,34 @@ if "job_outputs" not in st.session_state:
     st.session_state.job_outputs = {}   # task_key -> (output, filename)
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
+#
+if "clicked" not in st.session_state:
+    st.session_state.clicked = False
+
+# Custom styled button
+st.markdown("""
+<style>
+.my-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Actual clickable button
+if st.button("Click Me"):
+    st.session_state.clicked = True
+
+# Action based on click
+if st.session_state.clicked:
+    st.write("Button clicked!")
+#
+
 
 # --- Sticky Top-Left Demo Button ---
 st.markdown("""

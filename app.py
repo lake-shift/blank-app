@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
+import json
 from streamlit_autorefresh import st_autorefresh
+import smtplib
 
 # --- Secrets ---
 host = st.secrets["HOST"]
@@ -18,35 +20,37 @@ if "uploaded_file_name" not in st.session_state:
 if "job_done" not in st.session_state:
     st.session_state.job_done = False
 if "job_outputs" not in st.session_state:
-    st.session_state.job_outputs = {}
+    st.session_state.job_outputs = {}  # task_key -> (output, filename)
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
 
-# --- CSS for floating button (bottom-right) ---
-with st.container():
-    st.markdown("""
-        <style>
-            .floating-btn-container {
-                position: fixed;
-                bottom: 25px;
-                left: 50%;
-                transform: translateX(-50%);
-                z-index: 9999;
-            }
-        </style>
-        <div class="floating-btn-container">
-    """, unsafe_allow_html=True)
+# --- CSS for sticky button ---
+st.markdown("""
+    <style>
+        .sticky-button {
+            position: fixed;
+            top: 60px;
+            left: 10px;
+            z-index: 9999;
+        }
+        .custom-button {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-    if st.button("Book your demo for free", key="floating_demo_button"):
-        st.session_state.show_form = not st.session_state.show_form  # toggle form
-
-    st.markdown("</div>", unsafe_allow_html=True)
-# --- Floating Demo Button (Streamlit button) ---
+# --- Sticky Top-Left Demo Button ---
 with st.container():
-    st.markdown('<div class="floating-btn-container">', unsafe_allow_html=True)
-    if st.button("Book your demo for free", key="demo_button"):
-        st.session_state.show_form = not st.session_state.show_form  # toggle form
-    st.markdown('</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns([1, 5])
+    with col1:
+        if st.button("Book demo for free", key="demo_button"):
+            st.session_state.show_form = True
 
 # --- Book Demo Form ---
 if st.session_state.show_form:
@@ -201,3 +205,4 @@ if st.session_state.job_outputs:
             mime="text/plain",
             key=f"dl_{task_key}"
         )
+        

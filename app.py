@@ -27,8 +27,9 @@ st.markdown("""
     <style>
         .sticky-button {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 9999;
         }
         .custom-button {
@@ -43,8 +44,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Sticky Top-Left Demo Button ---
-if st.button("Book demo for free", key="demo_button"):
+# --- Sticky Bottom-Center Demo Button ---
+st.markdown("""
+<div class="sticky-button">
+    <button class="custom-button" onclick="document.dispatchEvent(new Event('st_demo_button'))">
+        Book demo for free
+    </button>
+</div>
+""", unsafe_allow_html=True)
+
+# Detect button click
+if st.query_params.get("st_demo_button") is not None:
     st.session_state.show_form = not st.session_state.show_form  # toggle form visibility
 
 # --- Book Demo Form ---

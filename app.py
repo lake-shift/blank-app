@@ -1,8 +1,6 @@
 import streamlit as st
 import requests
-import json
 from streamlit_autorefresh import st_autorefresh
-import smtplib
 
 # --- Secrets ---
 host = st.secrets["HOST"]
@@ -20,7 +18,7 @@ if "uploaded_file_name" not in st.session_state:
 if "job_done" not in st.session_state:
     st.session_state.job_done = False
 if "job_outputs" not in st.session_state:
-    st.session_state.job_outputs = {}  # task_key -> (output, filename)
+    st.session_state.job_outputs = {}
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
 
@@ -29,8 +27,8 @@ st.markdown("""
     <style>
         .sticky-button {
             position: fixed;
-            top: 60px;
-            left: 10px;
+            top: 20px;
+            left: 20px;
             z-index: 9999;
         }
         .custom-button {
@@ -46,11 +44,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Sticky Top-Left Demo Button ---
-with st.container():
-    col1, col2 = st.columns([1, 5])
-    with col1:
-        if st.button("Book demo for free", key="demo_button"):
-            st.session_state.show_form = True
+if st.button("Book demo for free", key="demo_button"):
+    st.session_state.show_form = not st.session_state.show_form  # toggle form visibility
 
 # --- Book Demo Form ---
 if st.session_state.show_form:
@@ -204,4 +199,4 @@ if st.session_state.job_outputs:
             file_name=filename,
             mime="text/plain",
             key=f"dl_{task_key}"
-                )
+        )

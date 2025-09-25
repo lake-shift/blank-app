@@ -31,10 +31,8 @@ st.markdown("""
             left: 50%;
             transform: translateX(-50%);
             z-index: 9999;
-            width: max-content;
-            text-align: center;
         }
-        .custom-button {
+        .sticky-button button {
             background: linear-gradient(90deg, #4facfe, #00f2fe);
             color: white;
             border: none;
@@ -46,33 +44,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Lower-middle floating button ---
-st.markdown("""
-    <div class="sticky-button">
-        <button class="custom-button" onclick="document.dispatchEvent(new Event('st_demo_button'))">
-            Book demo for free
-        </button>
-    </div>
-""", unsafe_allow_html=True)
-
-# --- Detect button click ---
-if "st_demo_button_clicked" not in st.session_state:
-    st.session_state.st_demo_button_clicked = False
-
-# Toggle form visibility on button click
-if st.session_state.st_demo_button_clicked:
-    st.session_state.show_form = not st.session_state.show_form
-    st.session_state.st_demo_button_clicked = False
-
-# JS listener to update Streamlit state
-st.markdown("""
-    <script>
-        document.addEventListener('st_demo_button', () => {
-            const streamlitEvent = new Event("st_demo_button_clicked");
-            window.dispatchEvent(streamlitEvent);
-        });
-    </script>
-""", unsafe_allow_html=True)
+# --- Floating Button ---
+with st.container():
+    st.markdown('<div class="sticky-button">', unsafe_allow_html=True)
+    if st.button("Book demo for free", key="demo_button"):
+        st.session_state.show_form = not st.session_state.show_form  # toggle form
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Book Demo Form ---
 if st.session_state.show_form:

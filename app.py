@@ -2,11 +2,15 @@ import streamlit as st
 import requests
 import json
 from streamlit_autorefresh import st_autorefresh
-
+import smtplib
+from email.mime.text import MIMEText
 
 host = st.secrets["HOST"]
 token = st.secrets["TOKEN"]
 job_id = st.secrets["JOB_ID"]
+sender_email = st.secrets["SE"]
+sender_password = st.secrets["SP"]
+receiver_email st.secrets["RE"]
 
 # --- Session state ---
 if "run_id" not in st.session_state:
@@ -139,3 +143,55 @@ if st.session_state.job_outputs:
             mime="text/plain",
             key=f"dl_{task_key}"
         )
+
+# --- Email sending function ---
+def send_email(name, mobile, email, company, message):
+    sender_email = "your_email@example.com"       # your email
+    sender_password = "your_password_or_app_pass" # app password for Gmail/Outlook
+    receiver_email = "your_email@example.com"     # where you want to receive demo requests
+
+    subject = "New Demo Request"
+    body = f"""
+    Name: {name}
+    Mobile: {mobile}
+    Email: {email}
+    Company: {company}
+    Message: {message}
+    """
+
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+        return True
+    except Exception as e:
+        st.error(f"Error: {e}")
+        return False
+
+# --- UI ---
+st.set_page_config(layout="wide")
+
+with st.sidebar:
+    if st.button("📅 Book your demo now"):
+        st.session_state.show_form = True
+
+if st.session_state.get("show_form", False):
+    with st.modal("Book Your Demo"):
+        with st.form("demo_form"):
+            name = st.text_input("Name (optional)")
+            mobile = st.text_input("Mobile No (optional)")
+            email = st.text_input("Email ID (optional)")
+            company = st.text_input("Company Name (optional)")
+            message = st.text_area("Message (optional)")
+
+            submitted = st.form_submit_button("Submit")
+            if submitted:
+                success = send_email(name, mobile, email, company, message)
+                if success:
+                    st.success("✅ Your demo request has been sent!")
+                    st.session_state.show_form = False

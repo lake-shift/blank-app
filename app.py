@@ -18,7 +18,7 @@ if "uploaded_file_name" not in st.session_state:
 if "job_done" not in st.session_state:
     st.session_state.job_done = False
 if "job_outputs" not in st.session_state:
-    st.session_state.job_outputs = {}
+    st.session_state.job_outputs = {}  # task_key -> (output, filename)
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
 
@@ -32,28 +32,24 @@ st.markdown("""
             transform: translateX(-50%);
             z-index: 9999;
         }
+        .custom-button {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
     </style>
 """, unsafe_allow_html=True)
 
-# --- Sticky Bottom-Center Demo Button using st.button ---
+# --- Sticky Bottom-Center Demo Button ---
 with st.container():
     st.markdown('<div class="sticky-button">', unsafe_allow_html=True)
     if st.button("Book demo for free", key="demo_button"):
         st.session_state.show_form = not st.session_state.show_form  # toggle form
     st.markdown('</div>', unsafe_allow_html=True)
-
-# --- Sticky Bottom-Center Demo Button ---
-st.markdown("""
-<div class="sticky-button">
-    <button class="custom-button" onclick="document.dispatchEvent(new Event('st_demo_button'))">
-        Book demo for free
-    </button>
-</div>
-""", unsafe_allow_html=True)
-
-# Detect button click
-if st.query_params.get("st_demo_button") is not None:
-    st.session_state.show_form = not st.session_state.show_form  # toggle form visibility
 
 # --- Book Demo Form ---
 if st.session_state.show_form:
@@ -207,4 +203,4 @@ if st.session_state.job_outputs:
             file_name=filename,
             mime="text/plain",
             key=f"dl_{task_key}"
-        )
+    )

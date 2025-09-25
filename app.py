@@ -161,7 +161,8 @@ with st.container():
     col1, col2 = st.columns([1, 5])
     with col1:
         if st.button("Book demo for free", key="demo_button"):
-            st.session_state.show_form = True
+            # Toggle the form visibility on each click
+            st.session_state.show_form = not st.session_state.show_form
 
 # --- Book Demo Form ---
 if st.session_state.show_form:

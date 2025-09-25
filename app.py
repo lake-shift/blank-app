@@ -23,21 +23,12 @@ if "show_form" not in st.session_state:
     st.session_state.show_form = False
 
 # --- CSS for floating button (bottom-right) ---
-st.markdown("""
-    <style>
-        .floating-btn-container {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            z-index: 9999;
-        }
-    </style>
-""", unsafe_allow_html=True)
+
 
 # --- Floating Demo Button (Streamlit button) ---
 with st.container():
     st.markdown('<div class="floating-btn-container">', unsafe_allow_html=True)
-    if st.button("💬 Demo", key="demo_button"):
+    if st.button("Book your demo for free", key="demo_button"):
         st.session_state.show_form = not st.session_state.show_form  # toggle form
     st.markdown('</div>', unsafe_allow_html=True)
 

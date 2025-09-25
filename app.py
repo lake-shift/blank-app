@@ -3,7 +3,8 @@ import requests
 import json
 from streamlit_autorefresh import st_autorefresh
 import smtplib
-from email.mime.text import MIMEText
+import requests
+
 
 
 host = st.secrets["HOST"]
@@ -146,45 +147,44 @@ if st.session_state.job_outputs:
         )
 
 
-# --- Email sending function ---
+
+API_KEY = "your_brevo_api_key"   # paste Brevo API key here
+TO_EMAIL = sender_email
+FROM_EMAIL = receiver_email
+
 def send_email(name, mobile, email, company, message):
-    #sender_email = sender_email
-    #sender_password = sender_password
-    #receiver_email = receiver_email
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "accept": "application/json",
+        "api-key": API_KEY,
+        "content-type": "application/json"
+    }
+    payload = {
+        "sender": {"name": "Lakeshift", "email": FROM_EMAIL},
+        "to": [{"email": TO_EMAIL}],
+        "subject": "New Demo Request",
+        "htmlContent": f"""
+        <h3>New Demo Request</h3>
+        <p><b>Name:</b> {name}</p>
+        <p><b>Mobile:</b> {mobile}</p>
+        <p><b>Email:</b> {email}</p>
+        <p><b>Company:</b> {company}</p>
+        <p><b>Message:</b> {message}</p>
+        """
+    }
 
-    subject = "New Demo Request"
-    body = f"""
-    Name: {name}
-    Mobile: {mobile}
-    Email: {email}
-    Company: {company}
-    Message: {message}
-    """
-
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = sender_email
-    msg["To"] = receiver_email
-
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(sender_email, sender_password)
-            server.sendmail(sender_email, receiver_email, msg.as_string())
-        return True
-    except Exception as e:
-        st.error(f"Error: {e}")
-        return False
+    response = requests.post(url, headers=headers, json=payload)
+    return response.status_code == 201
 
 # --- UI ---
-st.set_page_config(layout="wide")
+st.sidebar.title("📅 Book your demo now")
+if "show_form" not in st.session_state:
+    st.session_state.show_form = False
 
-# Show button in sidebar
-with st.sidebar:
-    if st.button("📅 Book your demo now"):
-        st.session_state.show_form = True
+if st.sidebar.button("Book Demo"):
+    st.session_state.show_form = True
 
-# Show form if button clicked
-if st.session_state.get("show_form", False):
+if st.session_state.show_form:
     st.subheader("Book Your Demo")
     with st.form("demo_form"):
         name = st.text_input("Name (optional)")
@@ -199,3 +199,5 @@ if st.session_state.get("show_form", False):
             if success:
                 st.success("✅ Your demo request has been sent!")
                 st.session_state.show_form = False
+            else:
+                st.error("❌ Failed to send email. Please try again later.")

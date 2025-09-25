@@ -177,11 +177,11 @@ def send_email(name, mobile, email, company, message):
     return response.status_code == 201
 
 # --- UI ---
-st.sidebar.title("📅 Book your demo now")
-if "show_form" not in st.session_state:
-    st.session_state.show_form = False
+st.set_page_config(layout="wide")
 
-if st.sidebar.button("Book Demo"):
+# Use columns to place button on top-left
+col1, col2, col3 = st.columns([1, 8, 1])  # col1 is small, col2 fills center
+if col1.button("📅 Book demo for free"):
     st.session_state.show_form = True
 
 if st.session_state.show_form:

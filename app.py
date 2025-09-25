@@ -51,16 +51,16 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Detect button click
-if st.experimental_get_query_params().get("st_demo_button") is not None:
+if st.query_params.get("st_demo_button") is not None:
     st.session_state.show_form = True
-
+    
 # --- Book Demo Form ---
 if st.session_state.show_form:
     st.subheader("Book Your Demo")
     with st.form("demo_form"):
         name = st.text_input("Name (optional)")
         mobile = st.text_input("Mobile No (optional)")
-        email = st.text_input("Email ID (optional)")
+        email = st.text_input("Email ID")
         company = st.text_input("Company Name (optional)")
         message = st.text_area("Message (optional)")
 

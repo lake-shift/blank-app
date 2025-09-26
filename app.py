@@ -19,18 +19,28 @@ PASSWORD = "1234"    # change to your password
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
+
 def login():
     st.title("🔐 Login Required")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
-    if st.button("Login"):
-        if username == USERNAME and password == PASSWORD:
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Login"):
+            if username == USERNAME and password == PASSWORD:
+                st.session_state.authenticated = True
+                st.success("Login successful ✅")
+                st.rerun()
+            else:
+                st.error("Invalid username or password ❌")
+
+    with col2:
+        if st.button("👉 For demo click here"):
             st.session_state.authenticated = True
-            st.success("Login successful ✅")
+            st.session_state.demo_mode = True  # flag for demo
             st.rerun()
-        else:
-            st.error("Invalid username or password ❌")
+
 
 # --- Main App ---
 def main_app():
@@ -197,7 +207,6 @@ def main_app():
 
             submitted = st.form_submit_button("Submit")
             if submitted:
-                # Send email via Brevo API
                 def send_email(name, mobile, email, company, message):
                     url = "https://api.brevo.com/v3/smtp/email"
                     headers = {
@@ -229,11 +238,13 @@ def main_app():
                     st.error("❌ Failed to send email. Please try again later.")
 
     # --- Logout ---
-    if st.button("Logout"):
-        st.session_state.authenticated = False
-        st.rerun()
+    if not st.session_state.get("demo_mode", False):  # only show logout if not demo
+        if st.button("Logout"):
+            st.session_state.authenticated = False
+            st.rerun()
 
-# Run app
+
+# --- App Runner ---
 if not st.session_state.authenticated:
     login()
 else:

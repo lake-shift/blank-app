@@ -11,8 +11,10 @@ job_id = st.secrets["JOB_ID"]
 sender_email = st.secrets["SE"]
 receiver_email = st.secrets["RE"]
 api_key = st.secrets["AK"]
-api1 = st.secrets("api1")
-api2 = st.secrets("api2")
+
+# --- Authentication ---
+USERNAME = "admin"   # change to your username
+PASSWORD = "1234"    # change to your password
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -41,13 +43,13 @@ def login():
     )
 
     st.write("### 🔐 Login Required")
-    api11 = st.text_input("username")
-    api22 = st.text_input("Password", type="password")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
 
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Login"):
-            if lower(api1) == api11 and api2 == api22:
+            if username == USERNAME and password == PASSWORD:
                 st.session_state.authenticated = True
                 st.success("Login successful ✅")
                 st.rerun()

@@ -21,7 +21,28 @@ if "authenticated" not in st.session_state:
 
 
 def login():
-    st.title("🔐 Login Required")
+    # --- Header same as main app ---
+    st.markdown("""
+        <h1 style="
+            text-align: center;
+            font-size: 56px;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+        ">
+            LakeShift
+        </h1>
+    """, unsafe_allow_html=True)
+
+    st.markdown(
+        "<h4 style='text-align:center; color:gray;'>Migrate SAP HANA Calculation Views to Databricks in one click 🚀</h4>",
+        unsafe_allow_html=True
+    )
+
+    st.write("### 🔐 Login Required")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
@@ -167,7 +188,7 @@ def main_app():
                 key=f"dl_{task_key}"
             )
 
-    # --- CSS for sticky button ---
+    # --- Sticky Demo Button CSS ---
     st.markdown("""
         <style>
             .sticky-button {
@@ -176,19 +197,10 @@ def main_app():
                 left: 10px;
                 z-index: 9999;
             }
-            .custom-button {
-                background: linear-gradient(90deg, #4facfe, #00f2fe);
-                color: white;
-                border: none;
-                padding: 12px 20px;
-                font-size: 16px;
-                border-radius: 6px;
-                cursor: pointer;
-            }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- Sticky Top-Left Demo Button ---
+    # --- Sticky Demo Button ---
     with st.container():
         col1, col2 = st.columns([1, 5])
         with col1:

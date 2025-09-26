@@ -12,6 +12,11 @@ sender_email = st.secrets["SE"]
 receiver_email = st.secrets["RE"]
 api_key = st.secrets["AK"]
 
+# Add credentials in secrets.toml like this:
+# [credentials]
+# username = "admin"
+# password = "MySecurePass"
+
 # --- Session state ---
 if "run_id" not in st.session_state:
     st.session_state.run_id = None
@@ -23,6 +28,8 @@ if "job_outputs" not in st.session_state:
     st.session_state.job_outputs = {}  # task_key -> (output, filename)
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
+if "auth_valid" not in st.session_state:
+    st.session_state.auth_valid = False
 
 # --- UI Header ---
 st.markdown("""
@@ -48,35 +55,54 @@ st.markdown(
 # --- File Uploader ---
 uploaded_file = st.file_uploader("Choose a file", type=["txt", "xml"])
 
-# --- Start Button ---
-if uploaded_file is not None and st.button("🚀 Start"):
-    file_bytes = uploaded_file.read()
-    volume_path = f"/Volumes/project1/project1/project1/{uploaded_file.name}"
+# --- Start Button with Auth ---
+if uploaded_file is not None:
+    if st.button("🚀 Start"):
+        if not st.session_state.auth_valid:
+            with st.form("auth_form"):
+                st.warning("🔒 Please log in to continue")
+                username = st.text_input("Username")
+                password = st.text_input("Password", type="password")
+                auth_submit = st.form_submit_button("Login")
 
-    # Upload file to Databricks
-    url = f"{host}/api/2.0/fs/files{volume_path}"
-    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/octet-stream"}
-    response = requests.put(url, headers=headers, data=file_bytes)
+                if auth_submit:
+                    valid_username = st.secrets["username"]
+                    valid_password = st.secrets["password"]
 
-    if response.status_code in [200, 201, 204]:
-        st.success("✅ File uploaded")
+                    if username.lower() == valid_username.lower() and password == valid_password:
+                        st.session_state.auth_valid = True
+                        st.success("✅ Login successful! Please click Start again.")
+                    else:
+                        st.error("❌ Invalid username or password ( password is case-sensitive).")
 
-        # Trigger Databricks Job
-        run_url = f"{host}/api/2.1/jobs/run-now"
-        payload = {"job_id": job_id, "notebook_params": {"xml_input": volume_path}}
-        run_response = requests.post(run_url, headers={"Authorization": f"Bearer {token}"}, json=payload)
+        elif st.session_state.auth_valid:
+            file_bytes = uploaded_file.read()
+            volume_path = f"/Volumes/project1/project1/project1/{uploaded_file.name}"
 
-        if run_response.status_code == 200:
-            run_id = run_response.json().get("run_id")
-            st.session_state.run_id = run_id
-            st.session_state.uploaded_file_name = uploaded_file.name
-            st.session_state.job_done = False
-            st.session_state.job_outputs = {}
-            st.success(f"🚀 LakeShift Unique Id: {run_id}")
-        else:
-            st.error(f"❌ Job failed: {run_response.status_code} - {run_response.text}")
-    else:
-        st.error(f"❌ Upload failed: {response.status_code} - {response.text}")
+            # Upload file to Databricks
+            url = f"{host}/api/2.0/fs/files{volume_path}"
+            headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/octet-stream"}
+            response = requests.put(url, headers=headers, data=file_bytes)
+
+            if response.status_code in [200, 201, 204]:
+                st.success("✅ File uploaded")
+
+                # Trigger Databricks Job
+                run_url = f"{host}/api/2.1/jobs/run-now"
+                payload = {"job_id": job_id, "notebook_params": {"xml_input": volume_path}}
+                run_response = requests.post(run_url, headers={"Authorization": f"Bearer {token}"}, json=payload)
+
+                if run_response.status_code == 200:
+                    run_id = run_response.json().get("run_id")
+                    st.session_state.run_id = run_id
+                    st.session_state.uploaded_file_name = uploaded_file.name
+                    st.session_state.job_done = False
+                    st.session_state.job_outputs = {}
+                    st.success(f"🚀 LakeShift Unique Id: {run_id}")
+                else:
+                    st.error(f"❌ Job failed: {run_response.status_code} - {run_response.text}")
+            else:
+                st.error(f"❌ Upload failed: {response.status_code} - {response.text}")
 
 # --- Polling with auto-refresh ---
 if st.session_state.run_id and not st.session_state.job_done:

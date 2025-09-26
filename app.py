@@ -13,8 +13,8 @@ receiver_email = st.secrets["RE"]
 api_key = st.secrets["AK"]
 
 # --- Authentication ---
-USERNAME = "admin"   # change to your username
-PASSWORD = "1234"    # change to your password
+USERNAME = st.secrets["api1"]
+PASSWORD = st.secrets["api2"]
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False

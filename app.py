@@ -49,7 +49,7 @@ def login():
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Login"):
-            if username == USERNAME and password == PASSWORD:
+            if lower(username) == USERNAME and password == PASSWORD:
                 st.session_state.authenticated = True
                 st.success("Login successful ✅")
                 st.rerun()
